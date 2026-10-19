@@ -87,4 +87,3 @@ My unit tests strictly utilize the official POE assignment test data:
 
 - [x] **Console Application Only**: Built strictly as a CLI console app.
 - [x] **Version Control**: Managed with continuous commits on GitHub.
-- [x] **Video Presentation Link**: 
