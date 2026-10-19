@@ -85,7 +85,6 @@ My unit tests strictly utilize the official POE assignment test data:
 
 ## Submission Compliance Checklist
 
-**Console Application Only**: Built strictly as a CLI console app.
-      **Version Control**: Managed with continuous commits on GitHub.
-      **Video Presentation Link**: `[INSERT UNLISTED YOUTUBE VIDEO LINK HERE]`
-```
+- [x] **Console Application Only**: Built strictly as a CLI console app.
+- [x] **Version Control**: Managed with continuous commits on GitHub.
+- [x] **Video Presentation Link**: 
