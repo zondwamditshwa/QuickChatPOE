@@ -1,99 +1,69 @@
-package quickchat;
+package com.prog5121;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+/**
+ * JUnit 5 Unit Tests for Part 2 - Message Class
+ */
+public class MessageTest {
 
-class MessageTest {
+    private Message message;
 
-
-    @Test
-    void testMessageIdIsNeverMoreThanTenCharacters() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        assertTrue(message.checkMessageID());
-        assertTrue(message.getMessageID().length() <= 10);
-    }
-
-
-    @Test
-    void testRecipientCellCorrectlyFormatted() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        assertEquals("Recipient cell phone number successfully captured.", message.checkRecipientCell());
+    @BeforeEach
+    public void setUp() {
+        Message.resetTotalMessages();
+        message = new Message("0012345678", 0, "+27718693002", "Hi Mike, can you join us for dinner tonight?", "00:0:HITONIGHT", "Pending");
     }
 
     @Test
-    void testRecipientCellIncorrectlyFormatted() {
-        Message message = new Message("08575975889", "Don't forget to bring the dessert.");
-        assertEquals("Cell phone number is incorrectly formatted or does not contain an international code.",
-                message.checkRecipientCell());
-    }
-
-
-    @Test
-    void testMessageWithinLengthLimit() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        assertEquals("Message sent.", message.checkMessageLength());
+    public void testMessageLengthSuccess() {
+        String result = message.validateMessageLength("Hi Mike, can you join us for dinner tonight?");
+        assertEquals("Message ready to send.", result);
     }
 
     @Test
-    void testMessageExceedsLengthLimit() {
-        String longText = "a".repeat(251);
-        Message message = new Message("+27718693002", longText);
-        assertEquals("Please enter a message of less than 250 characters.", message.checkMessageLength());
-    }
-
-
-    @Test
-    void testCreateMessageHashFormat() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        message.sendMessage("send");
-
-        String expectedPrefix = message.getMessageID().substring(0, 2);
-        String expectedHash = expectedPrefix + ":" + message.getMessageNumber() + ":HITONIGHT?";
-        assertEquals(expectedHash, message.getMessageHash());
-    }
-
-
-    @Test
-    void testSendMessageReturnsSuccessAndIncrementsTotal() {
-        int before = Message.returnTotalMessages();
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        assertEquals("Message successfully sent.", message.sendMessage("send"));
-        assertEquals(before + 1, Message.returnTotalMessages());
+    public void testMessageLengthFailure() {
+        StringBuilder longMsg = new StringBuilder();
+        for (int i = 0; i < 260; i++) {
+            longMsg.append("a");
+        }
+        String result = message.validateMessageLength(longMsg.toString());
+        assertTrue(result.contains("Message exceeds 250 characters"));
     }
 
     @Test
-    void testDisregardMessage() {
-        Message message = new Message("+27718693002", "Never mind, ignore this one.");
-        assertEquals("Press 0 to delete the message.", message.sendMessage("disregard"));
+    public void testRecipientCellCorrect() {
+        assertTrue(message.checkRecipientCell("+27718693002"));
     }
 
     @Test
-    void testStoreMessage() {
-        Message message = new Message("+27718693002", "Save this one for later.");
-        assertEquals("Message successfully stored.", message.sendMessage("store"));
+    public void testRecipientCellIncorrect() {
+        assertFalse(message.checkRecipientCell("08575075889"));
     }
 
     @Test
-    void testInvalidSendOption() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        assertEquals("Invalid option selected.", message.sendMessage("maybe"));
+    public void testCreateMessageHash() {
+        String hash = message.createMessageHash("0012345678", 0, "Hi Mike, can you join us for dinner tonight?");
+        assertEquals("00:0:HITONIGHT", hash);
     }
 
+    @Test
+    public void testSentMessageOptionSend() {
+        assertEquals("Message successfully sent", message.sentMessage(1));
+        assertEquals("Sent", message.getFlag());
+    }
 
     @Test
-    void testPrintMessageDetailsContainsAllFields() {
-        Message message = new Message("+27718693002", "Hi Mike, can you join us for dinner tonight?");
-        message.sendMessage("send");
-        String details = message.printMessageDetails();
+    public void testSentMessageOptionDisregard() {
+        assertEquals("Press 0 to delete the message", message.sentMessage(2));
+        assertEquals("Disregarded", message.getFlag());
+    }
 
-        assertTrue(details.contains("Message ID: " + message.getMessageID()));
-        assertTrue(details.contains("Message Hash: " + message.getMessageHash()));
-        assertTrue(details.contains("Recipient: +27718693002"));
-        assertTrue(details.contains("Message: Hi Mike, can you join us for dinner tonight?"));
+    @Test
+    public void testSentMessageOptionStore() {
+        assertEquals("Message successfully stored", message.sentMessage(3));
+        assertEquals("Stored", message.getFlag());
     }
 }
-
- 
