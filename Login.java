@@ -1,112 +1,130 @@
-package quickchat;
+package com.prog5121;
 
-import java.util.regex.Pattern;
-
+/**
+ * PROG5121 Part 1 - Login and Registration Implementation
+ */
 public class Login {
+    private String username;
+    private String password;
+    private String cellPhoneNumber;
+    private String firstName;
+    private String lastName;
 
-    private static final Pattern CELL_PATTERN = Pattern.compile("^\\+27\\d{1,10}$");
+    public Login() {
+    }
 
-    private final String firstName;
-    private final String lastName;
-    private final String username;
-    private final String password;
-    private final String cellPhoneNumber;
-
-    public Login(String firstName, String lastName, String username,
-                 String password, String cellPhoneNumber) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Login(String username, String password, String cellPhoneNumber, String firstName, String lastName) {
         this.username = username;
         this.password = password;
         this.cellPhoneNumber = cellPhoneNumber;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    /**
+     * Checks if username contains an underscore and is no more than 5 characters long.
+     */
+    public boolean checkUserName(String username) {
+        if (username == null) return false;
+        return username.contains("_") && username.length() <= 5;
     }
 
     public boolean checkUserName() {
-        return username != null
-                && username.length() <= 5
-                && username.contains("_");
+        return checkUserName(this.username);
     }
 
-    public boolean checkPasswordComplexity() {
-        if (password == null || password.length() < 8) {
-            return false;
-        }
-        boolean hasCapital = false;
+    /**
+     * Checks if password meets complexity rules:
+     * - At least 8 characters long
+     * - Contains a capital letter
+     * - Contains a number
+     * - Contains a special character
+     */
+    public boolean checkPasswordComplexity(String password) {
+        if (password == null || password.length() < 8) return false;
+
+        boolean hasUpper = false;
         boolean hasDigit = false;
         boolean hasSpecial = false;
 
-        for (char c : password.toCharArray()) {
-            if (Character.isUpperCase(c)) {
-                hasCapital = true;
-            } else if (Character.isDigit(c)) {
-                hasDigit = true;
-            } else if (!Character.isLetterOrDigit(c)) {
-                hasSpecial = true;
-            }
+        String specialChars = "!@#$%^&*()_+-=[]{}|;:'\",.<>?/";
+
+        for (int i = 0; i < password.length(); i++) {
+            char c = password.charAt(i);
+            if (Character.isUpperCase(c)) hasUpper = true;
+            else if (Character.isDigit(c)) hasDigit = true;
+            else if (specialChars.indexOf(c) >= 0) hasSpecial = true;
         }
-        return hasCapital && hasDigit && hasSpecial;
+
+        return hasUpper && hasDigit && hasSpecial;
+    }
+
+    public boolean checkPasswordComplexity() {
+        return checkPasswordComplexity(this.password);
+    }
+
+    /**
+     * Checks if cell phone number contains international code (+27) and valid format.
+     */
+    public boolean checkCellPhoneNumber(String cellPhoneNumber) {
+        if (cellPhoneNumber == null) return false;
+        return cellPhoneNumber.startsWith("+27") && cellPhoneNumber.length() <= 13;
     }
 
     public boolean checkCellPhoneNumber() {
-        return cellPhoneNumber != null && CELL_PATTERN.matcher(cellPhoneNumber).matches();
+        return checkCellPhoneNumber(this.cellPhoneNumber);
     }
 
+    /**
+     * Registers user and returns appropriate status message.
+     */
     public String registerUser() {
-        boolean usernameOk = checkUserName();
-        boolean passwordOk = checkPasswordComplexity();
-        boolean cellOk = checkCellPhoneNumber();
-
-        if (usernameOk && passwordOk && cellOk) {
-            return "Username successfully captured." + System.lineSeparator()
-                    + "Password successfully captured." + System.lineSeparator()
-                    + "Cell phone number successfully added." + System.lineSeparator()
-                    + "User registered successfully.";
+        if (!checkUserName()) {
+            return "Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.";
         }
-
-        StringBuilder message = new StringBuilder();
-        if (!usernameOk) {
-            message.append("Username is not correctly formatted; please ensure that your username ")
-                    .append("contains an underscore and is no more than five characters in length.")
-                    .append(System.lineSeparator());
+        if (!checkPasswordComplexity()) {
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
         }
-        if (!passwordOk) {
-            message.append("Password is not correctly formatted; please ensure that the password ")
-                    .append("contains at least eight characters, a capital letter, a number, ")
-                    .append("and a special character.")
-                    .append(System.lineSeparator());
+        if (!checkCellPhoneNumber()) {
+            return "Cell phone number incorrectly formatted or does not contain international code.";
         }
-        if (!cellOk) {
-            message.append("Cell phone number incorrectly formatted or does not contain international code.")
-                    .append(System.lineSeparator());
-        }
-        return message.toString().trim();
+        return "Username successfully captured.";
     }
 
+    /**
+     * Verifies login credentials.
+     */
     public boolean loginUser(String enteredUsername, String enteredPassword) {
-        return username != null && username.equals(enteredUsername)
-                && password != null && password.equals(enteredPassword);
+        if (this.username == null || this.password == null) return false;
+        return this.username.equals(enteredUsername) && this.password.equals(enteredPassword);
     }
 
-    public String returnLoginStatus(boolean loginSuccessful) {
-        if (loginSuccessful) {
-            return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
+    /**
+     * Returns login status message.
+     */
+    public String returnLoginStatus(boolean isLoggedIn) {
+        if (isLoggedIn) {
+            String fName = (firstName != null) ? firstName : "";
+            String lName = (lastName != null) ? lastName : "";
+            return "Welcome " + fName + " " + lName + " it is great to see you.";
+        } else {
+            return "Username or password incorrect, please try again.";
         }
-        return "Username or password incorrect, please try again.";
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    // Getters and Setters
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getLastName() {
-        return lastName;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getCellPhoneNumber() { return cellPhoneNumber; }
+    public void setCellPhoneNumber(String cellPhoneNumber) { this.cellPhoneNumber = cellPhoneNumber; }
 
-    public String getCellPhoneNumber() {
-        return cellPhoneNumber;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 }
